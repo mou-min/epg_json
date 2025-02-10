@@ -24,20 +24,25 @@ jobs:
           #  sleep: 60s
 
     steps:
-      - name: download files
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ matrix.branch }}
+
+      - name: Download Files
         run: |
           wget https://raw.githubusercontent.com/${{ github.repository }}/${{ matrix.branch }}/md5.txt -O md5.txt
           url="${{ matrix.url }}"
           if [[ "$url" == *".gz" ]]; then
-            echo "url is end with gz"
+            echo "URL is a gzipped file"
             wget $url -O e.xml.gz
             gzip -df e.xml.gz
           else
-            echo "url is not end with gz"
+            echo "URL is a plain XML file"
             wget $url -O e.xml
           fi
 
-      - name: check md5
+      - name: Check MD5
         run: |
           md5=$(md5sum ./e.xml | awk '{print $1}')
           if ! grep -q "$md5" ./md5.txt; then
@@ -48,7 +53,7 @@ jobs:
             echo "tag=$tag" >> $GITHUB_ENV
           fi
 
-      - name: checkout code
+      - name: Checkout Code (if changed)
         uses: actions/checkout@v4
         if: ${{ env.isDiff }}
         with:
@@ -60,16 +65,16 @@ jobs:
         with:
           python-version: '3.12' 
 
-      - name: xml to json
+      - name: Convert XML to JSON
         if: ${{ env.isDiff }}
         working-directory: epg
         run: |
-          mkdir ./xml ./json
+          mkdir -p ./xml ./json
           mv -f ../e.xml ./xml/e.xml
           pip install -r requirements.txt
           python xml2json.py
 
-      - name: move file
+      - name: Move Files
         if: ${{ env.isDiff }}
         working-directory: epg
         run: |
@@ -89,15 +94,21 @@ jobs:
             epg/xml/*.xml
             epg/json/*.json
 
-      - name: Commit
+      - name: Save Files to Repository
         if: ${{ env.isDiff }}
         working-directory: epg
         run: |
           git config --local user.name "github-actions[bot]"
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          sed "2c * 更新时间: ${{ env.now_time }}" README.md -i
-          rm -rf ./xml
-          rm -rf ./json
-          git add --all
-          git commit -m "${{ env.now_time }}"
-          git push -f origin ${{ matrix.branch }}
+          
+          # 确保 xml/json 目录存在
+          mkdir -p xml json
+          
+          # 复制文件并保留最新版本
+          cp -f ./xml/${{ matrix.branch }}.xml ./xml/latest.xml
+          cp -f ./json/${{ matrix.branch }}.json ./json/latest.json
+          
+          # 提交变更
+          git add xml/*.xml json/*.json md5.txt
+          git commit -m "更新EPG数据: ${{ env.now_time }}"
+          git push origin ${{ matrix.branch }}
