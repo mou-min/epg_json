@@ -130,6 +130,6 @@ jobs:
           cp -f ./json/${{ matrix.branch }}.json ./json/latest.json
           
           # 提交变更
-          git add xml/*.xml json/*.json md5.txt
+          git add xml/*.xml json/*.json old/* md5.txt
           git commit -m "更新EPG数据: ${{ env.now_time }}"
           git push origin ${{ matrix.branch }}
