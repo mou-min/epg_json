@@ -103,38 +103,11 @@ jobs:
           
           # 确保 xml/json/old 目录存在
           mkdir -p xml json old
-          
-          # 定义下载基础 URL
-          BASE_URL="https://github.com/celetor/epg/releases/download"
-          # 定义日期范围 (例如：2024.02.14 到 2025.02.09)
-          START_DATE="2024-02-14"
-          END_DATE="2025-02-09"
-          # 定义要下载的文件名
-          FILES=("51zmt.json" "51zmt.xml")
-          
-          # 日期格式转换
-          current_date="$START_DATE"
-          while [[ "$current_date" != "$(date -I -d "$END_DATE + 1 day")" ]]; do
-              formatted_date=$(date -d "$current_date" '+%Y.%m.%d')
-
-              # 遍历每个文件，下载到 `old/`
-              for file in "${FILES[@]}"; do
-                  full_url="$BASE_URL/$formatted_date/$file"
-                  echo "Downloading: $full_url"
-                  
-                  # 忽略 404 错误，继续执行
-                  wget -c --retry-connrefused --waitretry=3 --timeout=30 --tries=5 -O "old/${formatted_date}-${file}" "$full_url" || true
-              done
-              
-              # 递增日期
-              current_date=$(date -I -d "$current_date + 1 day")
-          done
-
-          echo "All downloads completed!"
+          find ./old -type f -size 0 -delete
 
           # 复制文件并保留最新版本
-          cp -f ./xml/${{ matrix.branch }}.xml ./xml/latest.xml
-          cp -f ./json/${{ matrix.branch }}.json ./json/latest.json
+          cp -f ./xml/${{ matrix.branch }}.xml ./xml/${{ date -u -d '+8 hour' '+%Y-%m-%d' }}.xml
+          cp -f ./json/${{ matrix.branch }}.json ./json/${{ date -u -d '+8 hour' '+%Y-%m-%d' }}.json
           
           # 提交变更
           git add xml/*.xml json/*.json old/* md5.txt
