@@ -103,13 +103,13 @@ jobs:
           
           # 确保 xml/json/old 目录存在
           mkdir -p xml json old
-          find ./old -type f -size 0 -delete
 
           # 复制文件并保留最新版本
           cp -f ./xml/${{ matrix.branch }}.xml ./xml/${{ matrix.branch }}-$(date -u -d '+8 hour' '+%Y-%m-%d').xml
           cp -f ./json/${{ matrix.branch }}.json ./json/${{ matrix.branch }}-$(date -u -d '+8 hour' '+%Y-%m-%d').json
           
           # 提交变更
+          find old -type f -size 0 -delete
           git add xml/*.xml json/*.json old/* md5.txt
           git commit -m "更新EPG数据: ${{ env.now_time }}" || true  # 忽略无变更错误
           git push origin ${{ matrix.branch }}
