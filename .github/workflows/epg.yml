@@ -105,9 +105,9 @@ jobs:
           mkdir -p xml json old
           # 定义下载基础 URL
           BASE_URL="https://github.com/celetor/epg/releases/download"
-          # 定义日期范围 (例如：2024.02.01 到 2025.02.10)
-          START_DATE="2024-02-01"
-          END_DATE="2025-02-10"
+          # 定义日期范围 (例如：2024.02.14 到 2025.02.09)
+          START_DATE="2024-02-14"
+          END_DATE="2025-02-09"
           # 定义要下载的文件名
           FILES=("112114.json" "112114.xml" "erw.json" "erw.xml")
           # 日期格式转换
