@@ -110,7 +110,7 @@ jobs:
           START_DATE="2024-02-14"
           END_DATE="2025-02-09"
           # 定义要下载的文件名
-          FILES=("112114.json" "112114.xml" "erw.json" "erw.xml")
+          FILES=("51zmt.json" "51zmt.xml")
           
           # 日期格式转换
           current_date="$START_DATE"
